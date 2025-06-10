@@ -9,7 +9,7 @@ const constants = require('./constants.js');
 fileSizeLimit = constants.fileSizeLimit;
 timeout = 3600000;
 
-// catch SIGINT and SIGTERM and exit
+// catch SIGINT and SIGTERM and  exit
 // Using a single function to handle multiple signals
 function handle(signal) {
     logger.info(`Received ${signal}. Exiting...`);
