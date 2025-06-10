@@ -61,6 +61,19 @@ function convert(req,res,next) {
         {
             ffmpegParams.outputOptions=['-codec:a pcm_s16le' ];
         }
+        
+        // Check if input file has PCM extension or name contains PCM
+        const inputFileName = res.locals.savedFile.toLowerCase();
+        if (inputFileName.endsWith('.pcm') || inputFileName.includes('-pcm') || inputFileName.includes('_pcm')) {
+            // Default PCM input parameters - adjust as needed for your specific PCM files
+            ffmpegParams.inputOptions = [
+                '-f s16le',       // 16-bit signed little endian format
+                '-ar 24000',      // 16kHz sample rate
+                '-ac 1',          // 1 channel (mono)
+                '-acodec pcm_s16le'  // codec
+            ];
+            logger.info(`PCM file detected, applying specific input parameters`);
+        }
     }
     if (conversion == "video")
     {
@@ -89,6 +102,13 @@ function convert(req,res,next) {
 
     //ffmpeg processing... converting file...
     let ffmpegConvertCommand = ffmpeg(savedFile);
+    
+    // Apply input options if available (for PCM files)
+    if (ffmpegParams.inputOptions) {
+        ffmpegConvertCommand.inputOptions(ffmpegParams.inputOptions);
+        logger.debug(`Applied input options: ${ffmpegParams.inputOptions.join(' ')}`);
+    }
+    
     ffmpegConvertCommand
             .renice(constants.defaultFFMPEGProcessPriority)
             .outputOptions(ffmpegParams.outputOptions)
